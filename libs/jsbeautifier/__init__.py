@@ -816,7 +816,6 @@ class Beautifier:
             elif self.last_type == 'TK_END_BLOCK':
                 if self.inside_array > 0:
                     self.indent()
-                    print "increase indent"
                 self.append_newline()
                 
             else:
