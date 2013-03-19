@@ -776,7 +776,6 @@ class Beautifier:
                         self.append(' ')
                     else:
                         self.append_newline()
-                        #print "-append_newline3-"
                 elif self.last_text == '[' or self.last_text == ',':
                         if self.last_text == '[':
                             self.indent()
@@ -785,7 +784,6 @@ class Beautifier:
                             
                             self.append_newline()
                             self.indent()
-                        #print "-append_newline4-"
                         self.just_added_indent = True
                         #self.append(self.indent_string)
             self.indent()
@@ -817,7 +815,9 @@ class Beautifier:
                 if self.inside_array > 0:
                     self.indent()
                 self.append_newline()
-                
+            elif self.last_text == ']':
+                 self.indent()
+                 self.append_newline()
             else:
                 if self.is_array(self.flags.mode) and self.opts.keep_array_indentation:
                     self.opts.keep_array_indentation = False
