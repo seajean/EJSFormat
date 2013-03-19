@@ -170,7 +170,7 @@ class Beautifier:
         self.wanted_newline = False
         self.just_added_newline = False
         self.just_added_indent = False
-        self.inside_array = False
+        self.inside_array = 0
         self.do_block_just_closed = False
 
         if self.opts.indent_with_tabs:
@@ -661,7 +661,7 @@ class Beautifier:
 
     def handle_start_expr(self, token_text):
         if token_text == '[':
-            self.inside_array = True
+            self.inside_array += 1
             if self.last_type == 'TK_WORD' or self.last_text == ')':
                 if self.last_text in self.line_starters:
                     self.append(' ')
@@ -721,7 +721,7 @@ class Beautifier:
 
     def handle_end_expr(self, token_text):
         if token_text == ']':
-            self.inside_array = False
+            self.inside_array -= 1
             if self.last_text == '}':#self.opts.keep_array_indentation:
                 #if self.last_text == '}':
                     self.remove_indent()
@@ -761,10 +761,10 @@ class Beautifier:
             if self.last_type not in ['TK_OPERATOR', 'TK_START_EXPR']:
                 if self.last_type == 'TK_START_BLOCK':
                     self.append_newline()
-                    print "-append_newline1-"
+                    #print "-append_newline1-"
                 elif self.last_text == ',' and self.last_last_text == '}':
                     self.append_newline()
-                    print "-append_newline2-"
+                    #print "-append_newline2-"
                     #self.just_added_newline = False
                     #self.append(self.indent_string)
                 else:
@@ -776,7 +776,7 @@ class Beautifier:
                         self.append(' ')
                     else:
                         self.append_newline()
-                        print "-append_newline3-"
+                        #print "-append_newline3-"
                 elif self.last_text == '[' or self.last_text == ',':
                         if self.last_text == '[':
                             self.indent()
@@ -785,7 +785,7 @@ class Beautifier:
                             
                             self.append_newline()
                             self.indent()
-                        print "-append_newline4-"
+                        #print "-append_newline4-"
                         self.just_added_indent = True
                         #self.append(self.indent_string)
             self.indent()
@@ -814,7 +814,7 @@ class Beautifier:
                     # {}
                     self.trim_output()
             elif self.last_type == 'TK_END_BLOCK':
-                if self.inside_array:
+                if self.inside_array > 0:
                     self.indent()
                     print "increase indent"
                 self.append_newline()
@@ -823,14 +823,11 @@ class Beautifier:
                 if self.is_array(self.flags.mode) and self.opts.keep_array_indentation:
                     self.opts.keep_array_indentation = False
                     self.append_newline()
-                    print "start3"
-                    print "====2"
                     self.opts.keep_array_indentation = True
                 else:
                     if self.just_added_indent:
                         self.indent()
                         self.append_newline()
-                        print "====3"
                         self.just_added_indent = False
                     else:
                         self.append_newline()
@@ -893,7 +890,6 @@ class Beautifier:
         prefix = 'NONE'
 
         if self.last_type == 'TK_END_BLOCK':
-            print '-4-'
             if token_text not in ['else', 'catch', 'finally']:
                 prefix = 'NEWLINE'
             else:
@@ -904,33 +900,26 @@ class Beautifier:
                     self.append(' ')
         elif self.last_type == 'TK_SEMICOLON' and self.flags.mode in ['BLOCK', 'DO_BLOCK']:
             prefix = 'NEWLINE'
-            print '-5-'
         elif self.last_type == 'TK_SEMICOLON' and self.is_expression(self.flags.mode):
             prefix = 'SPACE'
-            print '-6-'
         elif self.last_type == 'TK_STRING':
             prefix = 'NEWLINE'
-            print '-7-'
         elif self.last_type == 'TK_WORD':
             if self.last_text == 'else' or self.last_text == 'var' or self.last_text == 'new':
                 # eat newlines between ...else *** some_op...seajean
                 # won't preserve extra newlines in this place (if any), but don't care that much
                 self.trim_output(True)
             prefix = 'SPACE'
-            print '-8-'
         elif self.last_type == 'TK_START_BLOCK':
             prefix = 'NEWLINE'
         elif self.last_type == 'TK_END_EXPR':
             self.append(' ')
             prefix = 'NEWLINE'
-            print '-9-'
 
         if self.flags.if_line and self.last_type == 'TK_END_EXPR':
             self.flags.if_line = False
-            print '-10-'
 
         if token_text in self.line_starters:
-            print '-11-'
             if self.last_text == 'else':
                 prefix = 'SPACE'
             else:
@@ -950,19 +939,16 @@ class Beautifier:
                 # no newline between return nnn
                 self.append(' ')
             elif self.last_type != 'TK_END_EXPR':
-                print "---2"
                 if (self.last_type != 'TK_START_EXPR' or token_text != 'var') and self.last_text != ':':
                     # no need to force newline on VAR -
                     # for (var x = 0...
                     if token_text == 'if' and self.last_word == 'else' and self.last_text != '{':
                         self.append(' ')
-                        print "---33"
                     else:
                         self.flags.var_line = False
                         self.flags.var_line_reindented = False
                         self.append_newline()
             elif token_text in self.line_starters and self.last_text != ')':
-                print "---5"
                 self.flags.var_line = False
                 self.flags.var_line_reindented = False
                 self.append_newline()
@@ -972,7 +958,6 @@ class Beautifier:
             self.append(' ')
             
 
-        print token_text
         self.append(token_text)
         self.last_word = token_text
 

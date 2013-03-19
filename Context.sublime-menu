@@ -1,7 +1,7 @@
 [
     { 
-    	"id": "jsformatmenu",
-    	"command": "js_format",
-    	"caption": "JsFormat"
+    	"id": "ecomjsformatmenu",
+    	"command": "ecom_js_format",
+    	"caption": "EcomJsFormat"
     }
 ]
