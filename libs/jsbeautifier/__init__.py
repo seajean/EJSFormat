@@ -171,6 +171,8 @@ class Beautifier:
         self.just_added_newline = False
         self.just_added_indent = False
         self.inside_array = 0
+        self.inside_array_fn = 0
+        self.just_array_fn = False
         self.do_block_just_closed = False
 
         if self.opts.indent_with_tabs:
@@ -727,6 +729,8 @@ class Beautifier:
                     self.remove_indent()
                     self.append_newline()
                     self.remove_indent()
+                    if self.inside_array == 0:
+                        self.append(self.indent_string)
                     self.append(token_text)
                     self.restore_mode()
                     return
@@ -742,52 +746,60 @@ class Beautifier:
 
 
     def handle_start_block(self, token_text):
-
         if self.last_word == 'do':
             self.set_mode('DO_BLOCK')
         else:
             self.set_mode('BLOCK')
 
-        if self.opts.brace_style == 'expand':
-            if self.last_type != 'TK_OPERATOR':
-                if self.last_text == '=' or (self.is_special_word(self.last_text) and self.last_text != 'else'):
+        #IF NOT ,
+        if self.last_type not in ['TK_OPERATOR', 'TK_START_EXPR']:
+            if self.last_type == 'TK_START_BLOCK':
+                self.append_newline()
+            elif self.last_type == 'TK_END_EXPR':
                     self.append(' ')
-                else:
-                    self.append_newline(True)
-
-            self.append(token_text)
-            self.indent()
-        else:
-            if self.last_type not in ['TK_OPERATOR', 'TK_START_EXPR']:
-                if self.last_type == 'TK_START_BLOCK':
-                    self.append_newline()
-                    #print "-append_newline1-"
-                elif self.last_text == ',' and self.last_last_text == '}':
-                    self.append_newline()
-                    #print "-append_newline2-"
-                    #self.just_added_newline = False
+                    #function inside array
+                    if self.inside_array > 0:
+                        self.just_array_fn = True
+                        self.indent()
+            elif self.last_text == ',' and self.last_last_text == '}':
+                self.indent()
+                self.append_newline()
+                #if self.inside_array:
+                    #print 'inside an array and last_last_type is }'
+                    
                     #self.append(self.indent_string)
-                else:
-                    self.append(' ')
+                    #self.remove_indent();
+                #print "-append_newline2-"
+                #self.just_added_newline = False
+                #self.append(self.indent_string)
             else:
-                # if TK_OPERATOR or TK_START_EXPR
-                if self.is_array(self.flags.previous_mode) and self.last_text == ',':
-                    if self.last_last_text == '}':
-                        self.append(' ')
-                    else:
-                        self.append_newline()
-                elif self.last_text == '[' or self.last_text == ',':
-                        if self.last_text == '[':
-                            self.indent()
-                            self.append_newline()
-                        if self.last_text == ',':
-                            
-                            self.append_newline()
-                            self.indent()
-                        self.just_added_indent = True
-                        #self.append(self.indent_string)
-            self.indent()
-            self.append(token_text)
+                self.append(' ')
+        else:
+            # if TK_OPERATOR or TK_START_EXPR
+#TK_END_EXPR
+#TK_OPERATOR
+#TK_COMMA
+#TK_END_EXPR
+#TK_COMMA
+#TK_END_EXPR
+            if self.is_array(self.flags.previous_mode) and self.last_text == ',':
+                if self.last_last_text == '}':
+                    self.append(' ')
+                else:
+                    self.append_newline()
+            elif self.last_text == '[':
+                 self.indent()
+                 self.append_newline()
+            elif self.last_text == ',':
+                 self.append_newline()
+                 self.remove_indent()
+            elif self.last_type == 'TK_OPERATOR':
+                 self.append(' ')
+            else:
+                 self.just_added_indent = True
+                 self.append(self.indent_string)
+        self.indent()
+        self.append(token_text)
 
 
 
@@ -795,7 +807,11 @@ class Beautifier:
 
     def handle_end_block(self, token_text):
         self.restore_mode()
+        if self.just_array_fn:
+            self.remove_indent()
+            self.just_array_fn = False
         if self.opts.brace_style == 'expand':
+            #print "style expand"
             if self.last_text != '{':
                 self.append_newline()
         else:
@@ -805,16 +821,19 @@ class Beautifier:
                     #if self.just_added_indent:
                     #self.indent()
                     #else:
+                    #print 'remove all indent'
                     self.remove_indent()
-                    #print "remove indent"
                     #self.indent()
                 else:
                     # {}
                     self.trim_output()
+            #if it function was inside,will cause a bug 
             elif self.last_type == 'TK_END_BLOCK':
-                if self.inside_array > 0:
-                    self.indent()
+                #if self.inside_array > 0:
+                    #self.indent()
                 self.append_newline()
+                if self.inside_array > 0:
+                    self.append(self.indent_string)
             elif self.last_text == ']':
                  self.indent()
                  self.append_newline()
@@ -829,7 +848,13 @@ class Beautifier:
                         self.append_newline()
                         self.just_added_indent = False
                     else:
-                        self.append_newline()
+                        if self.inside_array:
+                            self.append_newline()
+                            self.append(self.indent_string)
+                        else:
+                            self.append_newline()
+        if self.inside_array_fn > 0:
+            self.inside_array_fn = self.inside_array_fn - 1
         self.append(token_text)
 
 

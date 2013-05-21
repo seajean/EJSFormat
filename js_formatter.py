@@ -42,6 +42,9 @@ class PreSaveFormatListner(sublime_plugin.EventListener):
 			view.run_command("js_format")
 
 
+
+
+
 class JsFormatCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		settings = self.view.settings()
