@@ -795,6 +795,8 @@ class Beautifier:
                  self.remove_indent()
             elif self.last_type == 'TK_OPERATOR':
                  self.append(' ')
+            elif self.last_type == 'TK_START_EXPR':
+                 self.append('')
             else:
                  self.just_added_indent = True
                  self.append(self.indent_string)
