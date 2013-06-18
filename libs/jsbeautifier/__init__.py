@@ -713,8 +713,7 @@ class Beautifier:
             self.append(' ')
         elif self.last_word == 'function' or self.last_word == 'typeof':
             # function() vs function (), typeof() vs typeof ()
-            if self.opts.jslint_happy:
-                self.append(' ')
+            self.append(' ')
         elif self.last_text in self.line_starters or self.last_text == 'catch':
             self.append(' ')
 
