@@ -725,11 +725,13 @@ class Beautifier:
             self.inside_array -= 1
             if self.last_text == '}':#self.opts.keep_array_indentation:
                 #if self.last_text == '}':
-                    self.remove_indent()
+                    #print 'inside arr';
+                    #self.remove_indent()
                     self.append_newline()
-                    self.remove_indent()
-                    if self.inside_array == 0:
-                        self.append(self.indent_string)
+                    #self.remove_indent()
+                    self.minus_indent()
+                    #if self.inside_array == 0:
+                        #self.append(self.indent_string)
                     self.append(token_text)
                     self.restore_mode()
                     return
@@ -756,6 +758,7 @@ class Beautifier:
                 self.append_newline()
             elif self.last_type == 'TK_END_EXPR':
                     self.append(' ')
+       
                     #function inside array
                     if self.inside_array > 0:
                         self.just_array_fn = True
@@ -773,6 +776,7 @@ class Beautifier:
                 #self.append(self.indent_string)
             else:
                 self.append(' ')
+                #print 'append sp'
         else:
             # if TK_OPERATOR or TK_START_EXPR
 #TK_END_EXPR
@@ -801,6 +805,7 @@ class Beautifier:
                  self.append(self.indent_string)
         self.indent()
         self.append(token_text)
+        #self.append('@')
 
 
 
@@ -882,10 +887,12 @@ class Beautifier:
 
             if self.last_text in ['get', 'set', 'new'] or self.last_type == 'TK_WORD':
                 self.append(' ')
+                print 'append space1'
 
             if self.last_type == 'TK_WORD':
                 if self.last_text in ['get', 'set', 'new', 'return']:
                     self.append(' ')
+                    print 'append space2'
                 else:
                     self.append_newline()
             elif self.last_type == 'TK_OPERATOR' or self.last_text == '=':
@@ -961,6 +968,7 @@ class Beautifier:
               #  self.append(' ')
         elif prefix == 'NEWLINE':
             if self.is_special_word(self.last_text):
+
                 # no newline between return nnn
                 self.append(' ')
             elif self.last_type != 'TK_END_EXPR':
@@ -968,6 +976,7 @@ class Beautifier:
                     # no need to force newline on VAR -
                     # for (var x = 0...
                     if token_text == 'if' and self.last_word == 'else' and self.last_text != '{':
+
                         self.append(' ')
                     else:
                         self.flags.var_line = False
@@ -982,7 +991,6 @@ class Beautifier:
         elif prefix == 'SPACE':
             self.append(' ')
             
-
         self.append(token_text)
         self.last_word = token_text
 

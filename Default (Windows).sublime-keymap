@@ -3,8 +3,8 @@
         "keys": ["ctrl+alt+o"], "command": "ecom_js_format",
         "context": [{"key": "selector", "operator": "equal", "operand": "source.js,source.json"}]
     },
-    { "keys": ["ctrl+alt+["], 
+    { "keys": ["ctrl+alt+["],
         "command": "ecom_css_format",
-        "args": { "action": "expand" }  
+        "args": { "action": "expand" }
     }
 ]
