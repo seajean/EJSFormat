@@ -841,7 +841,7 @@ class Beautifier:
                 if self.inside_array > 0:
                     self.append(self.indent_string)
             elif self.last_text == ']':
-                 self.indent()
+                 #self.indent()
                  self.append_newline()
             else:
                 if self.is_array(self.flags.mode) and self.opts.keep_array_indentation:
