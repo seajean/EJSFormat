@@ -872,9 +872,11 @@ class Beautifier:
             self.do_block_just_closed = False
             return
         if token_text == 'function':
+            print self.last_text
             if self.flags.var_line and self.last_text != '=':
                 self.flags.var_line_reindented = not self.opts.keep_function_indentation
             if (self.just_added_newline or self.last_text == ';') and self.last_text != '{':
+                #print 'GOTO1'
                 # make sure there is a nice clean space of at least one blank line
                 # before a new function definition
                 have_newlines = self.n_newlines
@@ -884,24 +886,32 @@ class Beautifier:
                     have_newlines = 1
                 for i in range(2 - have_newlines):
                     self.append_newline(False)
-
+                if self.last_text == ',':
+                    self.indent()
+                    self.append(self.indent_string)
+                    print 'indent'
             if self.last_text in ['get', 'set', 'new'] or self.last_type == 'TK_WORD':
+                #print 'GOTO2'
                 self.append(' ')
                 print 'append space1'
 
             if self.last_type == 'TK_WORD':
+                #print 'GOTO3'
                 if self.last_text in ['get', 'set', 'new', 'return']:
                     self.append(' ')
                     print 'append space2'
                 else:
                     self.append_newline()
             elif self.last_type == 'TK_OPERATOR' or self.last_text == '=':
+                #print 'GOTO4'
                 # foo = function
                 self.append(' ')
             elif self.is_expression(self.flags.mode):
+                #print 'GOTO5'
                 # (function
                 pass
             else:
+                print 'GOTO6'
                 self.append_newline()
 
             self.append('function')
